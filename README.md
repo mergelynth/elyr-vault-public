@@ -2,24 +2,38 @@
 
 **Privacy-first encrypted vault protocol** for locking crypto assets and secret data on-chain using Fully Homomorphic Encryption (FHE).
 
-Users create vaults that hold ETH, ERC-20 tokens, or arbitrary secret data — encrypted per-field at the client level before any on-chain transaction. Decryption is only possible by authorized participants via attested co-validator signatures.
+Users create vaults that hold ETH, ERC-20 tokens, SOL, SPL tokens, or arbitrary secret data — encrypted per-field at the client level before any on-chain transaction. Decryption is only possible by authorized participants via attested co-validator signatures. The protocol is multi-chain: EVM (Base Sepolia) and Solana (Devnet), both powered by the same FHE coprocessor.
 
 > **Status:** Work in Progress / Alpha Testnet  
-> **Network:** Base Sepolia (EVM) · Solana Devnet  
-> **Contract version:** v3.15.0 (UUPS upgradeable proxy)
+> **Networks:** Base Sepolia (EVM) · Solana Devnet  
+> **EVM Contract:** v3.15.0 (UUPS upgradeable proxy)  
+> **Solana Program:** Anchor + FHE Lightning
 
 ---
 
 ## What It Does
 
-Elyr Vault is a non-custodial protocol for creating time-locked, condition-gated encrypted vaults on public blockchains.
+Elyr Vault is a non-custodial protocol for creating time-locked, condition-gated encrypted vaults on public blockchains. It works on both EVM and Solana networks simultaneously.
 
-- **Lock** — deposit ETH, ERC-20, or secret text into a vault with configurable unlock conditions
+- **Lock** — deposit ETH, ERC-20, SOL, SPL tokens, or secret text into a vault with configurable unlock conditions
 - **Encrypt** — every sensitive field (recipient, amount, fallback, name, conditions, secret content) can be independently FHE-encrypted before reaching the chain
 - **Unlock** — vaults release automatically when on-chain conditions are met (time, inactivity, balance threshold, incoming transaction)
 - **Claim** — authorized recipients decrypt and claim assets via wallet signature; no third party ever sees plaintext
+- **Multi-chain** — unified experience across EVM and Solana with automatic network-aware fee calculation, explorer links, and wallet management
 
-All encryption and decryption happens client-side. The smart contract stores only FHE ciphertext (`euint256` handles). The blockchain never sees raw values for encrypted fields.
+All encryption and decryption happens client-side. The smart contracts store only FHE ciphertext (`euint256` handles). The blockchain never sees raw values for encrypted fields.
+
+---
+
+## Use Cases
+
+- **Crypto inheritance** — set up a dead man's switch that releases assets to heirs after a period of inactivity
+- **Time-locked savings** — lock assets until a future date with no way to withdraw early
+- **Conditional payments** — release funds when on-chain conditions are met (balance drops, tokens received)
+- **Private messaging** — store encrypted messages on-chain, readable only by the intended recipient
+- **Escrow** — lock assets with multi-party access and configurable claim rules
+- **Secret sharing** — distribute encrypted credentials, keys, or notes to specific wallet addresses
+- **DAO treasury vesting** — time-lock team allocations with per-field privacy
 
 ---
 
@@ -27,7 +41,7 @@ All encryption and decryption happens client-side. The smart contract stores onl
 
 | Type | Description |
 |------|-------------|
-| **Asset** | Lock ETH or ERC-20 tokens with optional encrypted amounts and recipients |
+| **Asset** | Lock ETH/ERC-20 (EVM) or SOL/SPL (Solana) with optional encrypted amounts and recipients |
 | **Secret** | Store encrypted text/data on-chain without any token transfer |
 | **Hybrid** | Lock assets AND attach encrypted secret data in a single vault |
 
@@ -44,7 +58,7 @@ Multiple conditions can be combined per vault:
 | **Balance Below** | Unlocks when a monitored address's token balance drops below a threshold |
 | **Incoming Transaction** | Unlocks when a monitored address receives specific tokens |
 
-Conditions support a configurable claim period and fallback behavior (return to creator, send to backup address, or keep locked).
+Conditions support a configurable claim period and fallback behavior (return to creator, send to backup address, or keep locked). When conditions are encrypted, a commit-reveal pattern ensures values remain private until claim time.
 
 ---
 
@@ -61,7 +75,7 @@ Each vault field can be independently toggled for FHE encryption, stored as `eui
 | Token | Token contract address masked |
 | Conditions | Unlock parameters encrypted (commit-reveal pattern) |
 
-Privacy flags are packed into a `uint8` bitmask — the contract never sees plaintext for encrypted fields.
+Privacy flags are packed into a `uint8` bitmask — the contract never sees plaintext for encrypted fields. Users choose their privacy level: from fully public vaults (no encryption, gas-only cost) to fully private (all fields encrypted).
 
 ---
 
@@ -74,7 +88,7 @@ Privacy flags are packed into a `uint8` bitmask — the contract never sees plai
 | **Observer** | Read-only access with configurable per-field permission bitmap |
 | **Fallback** | Receives refund if the vault expires unclaimed |
 
-Multi-recipient vaults (v3.14+) support `first-come` or `equal-split` claim distribution modes.
+Multi-recipient vaults (v3.14+) support `first-come` or `equal-split` claim distribution modes with per-recipient claim tracking.
 
 ---
 
@@ -118,7 +132,7 @@ UUPS upgradeable proxy on Base Sepolia. Modular architecture with 7 base modules
 
 **Key events:** `VaultCreated`, `VaultClaimed`, `VaultRefunded`, `ConditionDeposit`, `RecipientVerificationRequested`, `ObserverAdded`
 
-### Deployment (Base Sepolia)
+#### Deployment (Base Sepolia)
 
 | Field | Value |
 |-------|-------|
@@ -127,9 +141,11 @@ UUPS upgradeable proxy on Base Sepolia. Modular architecture with 7 base modules
 | Chain ID | `84532` |
 | Version | `3.15.0` |
 
-### Solana — inco-vault
+### Solana — Elyr Vault Program
 
-Anchor program with FHE Lightning integration. Encrypted vault accounts, SOL/SPL token deposits, claim/refund lifecycle.
+Anchor program with FHE Lightning integration. Encrypted vault accounts, SOL/SPL token deposits, claim/refund lifecycle. Mirrors the EVM vault logic with Solana-native account model.
+
+#### Deployment (Solana Devnet)
 
 | Field | Value |
 |-------|-------|
@@ -142,13 +158,13 @@ Anchor program with FHE Lightning integration. Encrypted vault accounts, SOL/SPL
 
 | Layer | Technology |
 |-------|------------|
-| Smart Contracts (EVM) | Solidity 0.8.30, Hardhat, `@inco/lightning` |
-| Smart Contracts (Solana) | Rust, Anchor, `@inco/solana-sdk` |
+| Smart Contracts (EVM) | Solidity 0.8.30, Hardhat |
+| Smart Contracts (Solana) | Rust, Anchor |
 | Frontend | Next.js 14, React 18, TypeScript |
 | Styling | Tailwind CSS, Framer Motion |
 | Wallet (EVM) | RainbowKit, wagmi, viem |
 | Wallet (Solana) | `@solana/wallet-adapter` |
-| FHE SDK | `@inco/js` |
+| Encryption | FHE (Fully Homomorphic Encryption) coprocessor |
 | Backend | NestJS, Prisma, PostgreSQL |
 | Monorepo | npm workspaces, Turborepo |
 
@@ -158,8 +174,10 @@ Anchor program with FHE Lightning integration. Encrypted vault accounts, SOL/SPL
 
 | Network | Type | Status | Currency | FHE Fee/field |
 |---------|------|--------|----------|---------------|
-| Base Sepolia | EVM | Active (default) | ETH | 0.001 ETH |
+| Base Sepolia | EVM (L2 testnet) | Active (default) | ETH | 0.001 ETH |
 | Solana Devnet | Solana | Active | SOL | 0.005 SOL |
+| Base Mainnet | EVM | Coming soon | ETH | TBD |
+| Solana Mainnet | Solana | Coming soon | SOL | TBD |
 
 ---
 
@@ -167,9 +185,9 @@ Anchor program with FHE Lightning integration. Encrypted vault accounts, SOL/SPL
 
 To interact with the protocol:
 
-1. Connect an EVM wallet (MetaMask, Rainbow, etc.) or Solana wallet (Phantom, Solflare)
-2. Switch to Base Sepolia or Solana Devnet
-3. Get testnet tokens from the built-in faucet (Settings page)
+1. Connect an EVM wallet (MetaMask, Rainbow, Coinbase Wallet, etc.) or Solana wallet (Phantom, Solflare)
+2. Switch to **Base Sepolia** (chain ID `84532`) for EVM or **Solana Devnet** for Solana
+3. Get testnet tokens from the built-in faucet (Settings page, 24h cooldown per wallet)
 4. Create a vault via the Deploy wizard or call the contract directly
 
 ---
@@ -186,4 +204,4 @@ Proprietary software. All rights reserved. No use without permission.
 
 ---
 
-Built with [Inco Network](https://inco.org) FHE
+Built with FHE · [Inco Network](https://inco.org)
