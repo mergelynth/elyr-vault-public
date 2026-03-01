@@ -204,4 +204,4 @@ Proprietary software. All rights reserved. No use without permission.
 
 ---
 
-Built with FHE · [Inco Network](https://inco.org)
+Built with FHE · [Inco](https://inco.org)
