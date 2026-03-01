@@ -1,0 +1,2149 @@
+{
+  "address": "8kKZoqm42xJtu1JWvH1ZeoLsucVyUKpGfmhrY2eBHjBK",
+  "metadata": {
+    "name": "inco_token",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Private Vault - Encrypted Vault Program for Solana using Inco Lightning"
+  },
+  "instructions": [
+    {
+      "name": "add_extra_condition",
+      "docs": [
+        "Add an extra condition to a vault"
+      ],
+      "discriminator": [
+        112,
+        127,
+        220,
+        244,
+        3,
+        132,
+        137,
+        111
+      ],
+      "accounts": [
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "vault_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "extra_condition",
+          "writable": true
+        },
+        {
+          "name": "creator",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "vault_id",
+          "type": "u64"
+        },
+        {
+          "name": "condition",
+          "type": {
+            "defined": {
+              "name": "ConditionInput"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "add_observer",
+      "docs": [
+        "Add an observer to a vault's observer list"
+      ],
+      "discriminator": [
+        233,
+        72,
+        76,
+        49,
+        240,
+        143,
+        134,
+        53
+      ],
+      "accounts": [
+        {
+          "name": "vault",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "vault_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "observer_list",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116,
+                  95,
+                  111,
+                  98,
+                  115,
+                  101,
+                  114,
+                  118,
+                  101,
+                  114,
+                  115
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "vault_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "creator",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "vault_id",
+          "type": "u64"
+        },
+        {
+          "name": "observer",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "add_secret_chunk",
+      "docs": [
+        "Add encrypted secret chunk to a vault",
+        "remaining_accounts: [vault_allowance, vault_address, creator_allowance, creator_address]"
+      ],
+      "discriminator": [
+        129,
+        113,
+        122,
+        192,
+        171,
+        145,
+        189,
+        189
+      ],
+      "accounts": [
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "vault_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "secret_chunk",
+          "writable": true
+        },
+        {
+          "name": "creator",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "inco_lightning_program",
+          "address": "5sjEbPiqgZrYwR31ahR6Uk9wf5awoX61YGg7jExQSwaj"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "vault_id",
+          "type": "u64"
+        },
+        {
+          "name": "ciphertext",
+          "type": "bytes"
+        },
+        {
+          "name": "input_type",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "claim_vault",
+      "docs": [
+        "Claim vault assets (verify recipient + check conditions)"
+      ],
+      "discriminator": [
+        87,
+        111,
+        176,
+        185,
+        53,
+        172,
+        227,
+        137
+      ],
+      "accounts": [
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "vault_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "claimer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "inco_lightning_program",
+          "address": "5sjEbPiqgZrYwR31ahR6Uk9wf5awoX61YGg7jExQSwaj"
+        }
+      ],
+      "args": [
+        {
+          "name": "vault_id",
+          "type": "u64"
+        },
+        {
+          "name": "claim_salt",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "condition_salt",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "condition_values",
+          "type": {
+            "vec": "u64"
+          }
+        }
+      ]
+    },
+    {
+      "name": "create_vault",
+      "docs": [
+        "Create a vault with SOL deposit + primary condition"
+      ],
+      "discriminator": [
+        29,
+        237,
+        247,
+        208,
+        193,
+        82,
+        54,
+        135
+      ],
+      "accounts": [
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "args.vault_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault_counter",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116,
+                  95,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116,
+                  101,
+                  114
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "creator",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "CreateVaultArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "deposit_for_condition",
+      "docs": [
+        "Deposit SOL for IncomingTransaction condition trigger"
+      ],
+      "discriminator": [
+        240,
+        100,
+        208,
+        144,
+        181,
+        244,
+        143,
+        86
+      ],
+      "accounts": [
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "vault_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "deposit_tracker",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116,
+                  95,
+                  100,
+                  101,
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  115
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "vault_id"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "activity_tracker",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  108,
+                  97,
+                  115,
+                  116,
+                  95,
+                  97,
+                  99,
+                  116,
+                  105,
+                  118,
+                  105,
+                  116,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "depositor"
+              }
+            ]
+          }
+        },
+        {
+          "name": "depositor",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "vault_id",
+          "type": "u64"
+        },
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "grant_decryption_rights",
+      "docs": [
+        "Grant FHE decryption rights (for secret vaults after conditions met)",
+        "remaining_accounts: ExtraCondition PDAs + condition data + FHE [allowance, address] pairs"
+      ],
+      "discriminator": [
+        89,
+        151,
+        122,
+        166,
+        76,
+        90,
+        27,
+        172
+      ],
+      "accounts": [
+        {
+          "name": "vault",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "vault_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "caller",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "inco_lightning_program",
+          "address": "5sjEbPiqgZrYwR31ahR6Uk9wf5awoX61YGg7jExQSwaj"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "vault_id",
+          "type": "u64"
+        },
+        {
+          "name": "claim_salt",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "condition_salt",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "condition_values",
+          "type": {
+            "vec": "u64"
+          }
+        }
+      ]
+    },
+    {
+      "name": "initialize_vault_counter",
+      "docs": [
+        "Initialize the global vault counter (one-time admin setup)"
+      ],
+      "discriminator": [
+        101,
+        77,
+        148,
+        61,
+        230,
+        129,
+        130,
+        231
+      ],
+      "accounts": [
+        {
+          "name": "vault_counter",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116,
+                  95,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116,
+                  101,
+                  114
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "record_activity",
+      "docs": [
+        "Record wallet activity (resets inactivity timer)"
+      ],
+      "discriminator": [
+        199,
+        86,
+        104,
+        65,
+        200,
+        211,
+        71,
+        50
+      ],
+      "accounts": [
+        {
+          "name": "activity_tracker",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  108,
+                  97,
+                  115,
+                  116,
+                  95,
+                  97,
+                  99,
+                  116,
+                  105,
+                  118,
+                  105,
+                  116,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "record_activity_by_sig",
+      "docs": [
+        "Record wallet activity via Ed25519 signature (relayer pattern)"
+      ],
+      "discriminator": [
+        248,
+        212,
+        140,
+        222,
+        81,
+        167,
+        199,
+        195
+      ],
+      "accounts": [
+        {
+          "name": "activity_tracker",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  108,
+                  97,
+                  115,
+                  116,
+                  95,
+                  97,
+                  99,
+                  116,
+                  105,
+                  118,
+                  105,
+                  116,
+                  121
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "wallet"
+              }
+            ]
+          }
+        },
+        {
+          "name": "activity_nonce",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  99,
+                  116,
+                  105,
+                  118,
+                  105,
+                  116,
+                  121,
+                  95,
+                  110,
+                  111,
+                  110,
+                  99,
+                  101
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "wallet"
+              }
+            ]
+          }
+        },
+        {
+          "name": "relayer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "instruction_sysvar",
+          "address": "Sysvar1nstructions1111111111111111111111111"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "wallet",
+          "type": "pubkey"
+        },
+        {
+          "name": "nonce",
+          "type": "u64"
+        },
+        {
+          "name": "deadline",
+          "type": "i64"
+        }
+      ]
+    },
+    {
+      "name": "refund_vault",
+      "docs": [
+        "Refund vault after deadline",
+        "remaining_accounts (SPL): [vault_token_account, caller_token_account, token_program]"
+      ],
+      "discriminator": [
+        229,
+        254,
+        53,
+        165,
+        5,
+        201,
+        46,
+        54
+      ],
+      "accounts": [
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "vault_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "caller",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "vault_id",
+          "type": "u64"
+        },
+        {
+          "name": "refund_salt",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "set_encrypted_field",
+      "docs": [
+        "Add encrypted field to an existing vault (FHE)",
+        "remaining_accounts: [vault_allowance, vault_address, creator_allowance, creator_address]"
+      ],
+      "discriminator": [
+        115,
+        99,
+        214,
+        235,
+        153,
+        1,
+        189,
+        102
+      ],
+      "accounts": [
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "vault_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "creator",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "inco_lightning_program",
+          "address": "5sjEbPiqgZrYwR31ahR6Uk9wf5awoX61YGg7jExQSwaj"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "vault_id",
+          "type": "u64"
+        },
+        {
+          "name": "field_type",
+          "type": "u8"
+        },
+        {
+          "name": "ciphertext",
+          "type": "bytes"
+        },
+        {
+          "name": "input_type",
+          "type": "u8"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "ActivityNonce",
+      "discriminator": [
+        129,
+        104,
+        216,
+        142,
+        243,
+        200,
+        227,
+        245
+      ]
+    },
+    {
+      "name": "ActivityTracker",
+      "discriminator": [
+        115,
+        180,
+        99,
+        189,
+        78,
+        165,
+        129,
+        164
+      ]
+    },
+    {
+      "name": "ConditionDepositTracker",
+      "discriminator": [
+        144,
+        112,
+        61,
+        90,
+        118,
+        204,
+        219,
+        139
+      ]
+    },
+    {
+      "name": "ExtraCondition",
+      "discriminator": [
+        20,
+        58,
+        139,
+        224,
+        168,
+        31,
+        1,
+        78
+      ]
+    },
+    {
+      "name": "ObserverList",
+      "discriminator": [
+        227,
+        143,
+        130,
+        136,
+        246,
+        187,
+        76,
+        174
+      ]
+    },
+    {
+      "name": "SecretChunk",
+      "discriminator": [
+        67,
+        110,
+        179,
+        38,
+        67,
+        13,
+        130,
+        83
+      ]
+    },
+    {
+      "name": "Vault",
+      "discriminator": [
+        211,
+        8,
+        232,
+        43,
+        2,
+        152,
+        117,
+        119
+      ]
+    },
+    {
+      "name": "VaultCounter",
+      "discriminator": [
+        180,
+        127,
+        122,
+        230,
+        154,
+        126,
+        126,
+        98
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "ActivityRecorded",
+      "discriminator": [
+        13,
+        102,
+        161,
+        232,
+        11,
+        141,
+        84,
+        217
+      ]
+    },
+    {
+      "name": "ConditionDeposited",
+      "discriminator": [
+        224,
+        132,
+        165,
+        121,
+        240,
+        116,
+        163,
+        183
+      ]
+    },
+    {
+      "name": "EncryptedFieldSet",
+      "discriminator": [
+        162,
+        125,
+        81,
+        131,
+        129,
+        24,
+        194,
+        172
+      ]
+    },
+    {
+      "name": "ExtraConditionAdded",
+      "discriminator": [
+        15,
+        26,
+        76,
+        253,
+        50,
+        60,
+        204,
+        178
+      ]
+    },
+    {
+      "name": "ObserverAdded",
+      "discriminator": [
+        189,
+        80,
+        125,
+        83,
+        214,
+        120,
+        122,
+        214
+      ]
+    },
+    {
+      "name": "SecretChunkAdded",
+      "discriminator": [
+        164,
+        8,
+        211,
+        161,
+        70,
+        33,
+        25,
+        69
+      ]
+    },
+    {
+      "name": "VaultClaimed",
+      "discriminator": [
+        232,
+        48,
+        41,
+        194,
+        218,
+        163,
+        56,
+        86
+      ]
+    },
+    {
+      "name": "VaultCreated",
+      "discriminator": [
+        117,
+        25,
+        120,
+        254,
+        75,
+        236,
+        78,
+        115
+      ]
+    },
+    {
+      "name": "VaultRefunded",
+      "discriminator": [
+        144,
+        207,
+        178,
+        46,
+        176,
+        40,
+        56,
+        210
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "VaultNotFound",
+      "msg": "Vault not found"
+    },
+    {
+      "code": 6001,
+      "name": "VaultNotLocked",
+      "msg": "Vault is not in locked state"
+    },
+    {
+      "code": 6002,
+      "name": "ConditionsNotMet",
+      "msg": "Unlock conditions are not met"
+    },
+    {
+      "code": 6003,
+      "name": "InvalidUnlockTime",
+      "msg": "Invalid unlock time — must be in the future"
+    },
+    {
+      "code": 6004,
+      "name": "InvalidDeadline",
+      "msg": "Invalid deadline — must be after unlock time"
+    },
+    {
+      "code": 6005,
+      "name": "InvalidRecipient",
+      "msg": "Invalid recipient"
+    },
+    {
+      "code": 6006,
+      "name": "DeadlineNotReached",
+      "msg": "Deadline has not been reached yet"
+    },
+    {
+      "code": 6007,
+      "name": "ClaimPeriodExpired",
+      "msg": "Claim period has expired (past deadline)"
+    },
+    {
+      "code": 6008,
+      "name": "InsufficientDeposit",
+      "msg": "Insufficient deposit amount"
+    },
+    {
+      "code": 6009,
+      "name": "InsufficientFee",
+      "msg": "Insufficient fee for FHE operations"
+    },
+    {
+      "code": 6010,
+      "name": "TransferFailed",
+      "msg": "SOL transfer failed"
+    },
+    {
+      "code": 6011,
+      "name": "NotAuthorizedForRefund",
+      "msg": "Not authorized for refund"
+    },
+    {
+      "code": 6012,
+      "name": "InvalidConditionReveal",
+      "msg": "Invalid condition reveal (commit-reveal mismatch)"
+    },
+    {
+      "code": 6013,
+      "name": "InvalidVaultId",
+      "msg": "Invalid vault ID (expected next sequential ID)"
+    },
+    {
+      "code": 6014,
+      "name": "InvalidVaultType",
+      "msg": "Vault type not supported for this operation"
+    },
+    {
+      "code": 6015,
+      "name": "InvalidVaultTypeValue",
+      "msg": "Invalid vault type value"
+    },
+    {
+      "code": 6016,
+      "name": "CreatorOnly",
+      "msg": "Only the creator can perform this action"
+    },
+    {
+      "code": 6017,
+      "name": "TooManyConditions",
+      "msg": "Extra conditions limit reached (max 3 extra)"
+    },
+    {
+      "code": 6018,
+      "name": "TooManySecretChunks",
+      "msg": "Secret chunks limit reached"
+    },
+    {
+      "code": 6019,
+      "name": "NameTooLong",
+      "msg": "Name too long (max 32 bytes)"
+    },
+    {
+      "code": 6020,
+      "name": "InvalidNameLength",
+      "msg": "Vault name length exceeds the name buffer"
+    },
+    {
+      "code": 6021,
+      "name": "NoConditions",
+      "msg": "No conditions provided"
+    },
+    {
+      "code": 6022,
+      "name": "Overflow",
+      "msg": "Arithmetic overflow"
+    },
+    {
+      "code": 6023,
+      "name": "ConditionCountMismatch",
+      "msg": "Condition count mismatch during commit verification"
+    },
+    {
+      "code": 6024,
+      "name": "UnsupportedEncryptedField",
+      "msg": "Encrypted field not supported for this vault type"
+    },
+    {
+      "code": 6025,
+      "name": "TooManyObservers",
+      "msg": "Too many observers (max 10)"
+    },
+    {
+      "code": 6026,
+      "name": "ObserverListFull",
+      "msg": "Observer list is full"
+    },
+    {
+      "code": 6027,
+      "name": "SignatureExpired",
+      "msg": "Signature has expired"
+    },
+    {
+      "code": 6028,
+      "name": "InvalidNonce",
+      "msg": "Invalid nonce for activity signature"
+    },
+    {
+      "code": 6029,
+      "name": "InvalidSignature",
+      "msg": "Invalid Ed25519 signature"
+    },
+    {
+      "code": 6030,
+      "name": "SplTransferFailed",
+      "msg": "SPL token transfer failed"
+    },
+    {
+      "code": 6031,
+      "name": "InvalidExtraConditionAccounts",
+      "msg": "Invalid remaining accounts for extra conditions"
+    }
+  ],
+  "types": [
+    {
+      "name": "ActivityNonce",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "wallet",
+            "type": "pubkey"
+          },
+          {
+            "name": "nonce",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ActivityRecorded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ActivityTracker",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ConditionDepositTracker",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "vault_id",
+            "type": "u64"
+          },
+          {
+            "name": "token",
+            "type": "pubkey"
+          },
+          {
+            "name": "total_amount",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ConditionDeposited",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "vault_id",
+            "type": "u64"
+          },
+          {
+            "name": "depositor",
+            "type": "pubkey"
+          },
+          {
+            "name": "token",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ConditionInput",
+      "docs": [
+        "Condition input for vault creation (passed as instruction arg)"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "condition_type",
+            "type": "u8"
+          },
+          {
+            "name": "value",
+            "type": "u64"
+          },
+          {
+            "name": "monitoring_address",
+            "type": "pubkey"
+          },
+          {
+            "name": "token_address",
+            "type": "pubkey"
+          },
+          {
+            "name": "value_commit",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "CreateVaultArgs",
+      "docs": [
+        "Args for create_vault instruction (flattened for tx size efficiency)"
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "vault_id",
+            "type": "u64"
+          },
+          {
+            "name": "recipient",
+            "type": "pubkey"
+          },
+          {
+            "name": "fallback_addr",
+            "type": "pubkey"
+          },
+          {
+            "name": "name",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "name_len",
+            "type": "u8"
+          },
+          {
+            "name": "deadline",
+            "type": "i64"
+          },
+          {
+            "name": "vault_type",
+            "type": "u8"
+          },
+          {
+            "name": "privacy_flags",
+            "type": "u8"
+          },
+          {
+            "name": "deposit_amount",
+            "type": "u64"
+          },
+          {
+            "name": "condition",
+            "type": {
+              "defined": {
+                "name": "ConditionInput"
+              }
+            }
+          },
+          {
+            "name": "recipient_commit",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "fallback_commit",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "EncryptedFieldSet",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "vault_id",
+            "type": "u64"
+          },
+          {
+            "name": "field_type",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Euint128",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          "u128"
+        ]
+      }
+    },
+    {
+      "name": "ExtraCondition",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "vault_id",
+            "type": "u64"
+          },
+          {
+            "name": "index",
+            "type": "u8"
+          },
+          {
+            "name": "condition_type",
+            "type": "u8"
+          },
+          {
+            "name": "value",
+            "type": "u64"
+          },
+          {
+            "name": "monitoring_address",
+            "type": "pubkey"
+          },
+          {
+            "name": "token_address",
+            "type": "pubkey"
+          },
+          {
+            "name": "condition_param",
+            "type": "u64"
+          },
+          {
+            "name": "has_encrypted_value",
+            "type": "bool"
+          },
+          {
+            "name": "encrypted_value",
+            "type": {
+              "defined": {
+                "name": "Euint128"
+              }
+            }
+          },
+          {
+            "name": "value_commit",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ExtraConditionAdded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "vault_id",
+            "type": "u64"
+          },
+          {
+            "name": "index",
+            "type": "u8"
+          },
+          {
+            "name": "condition_type",
+            "type": "u8"
+          },
+          {
+            "name": "value",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ObserverAdded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "vault_id",
+            "type": "u64"
+          },
+          {
+            "name": "observer",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ObserverList",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "vault_id",
+            "type": "u64"
+          },
+          {
+            "name": "observers",
+            "type": {
+              "vec": "pubkey"
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SecretChunk",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "vault_id",
+            "type": "u64"
+          },
+          {
+            "name": "index",
+            "type": "u8"
+          },
+          {
+            "name": "data",
+            "type": {
+              "defined": {
+                "name": "Euint128"
+              }
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SecretChunkAdded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "vault_id",
+            "type": "u64"
+          },
+          {
+            "name": "index",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Vault",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "id",
+            "type": "u64"
+          },
+          {
+            "name": "creator",
+            "type": "pubkey"
+          },
+          {
+            "name": "vault_type",
+            "type": "u8"
+          },
+          {
+            "name": "status",
+            "type": "u8"
+          },
+          {
+            "name": "privacy_flags",
+            "type": "u8"
+          },
+          {
+            "name": "name",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "name_len",
+            "type": "u8"
+          },
+          {
+            "name": "recipient_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "fallback_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "recipient_plain",
+            "type": "pubkey"
+          },
+          {
+            "name": "fallback_plain",
+            "type": "pubkey"
+          },
+          {
+            "name": "deadline",
+            "type": "i64"
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "deposit_token",
+            "type": "pubkey"
+          },
+          {
+            "name": "deposit_amount",
+            "type": "u64"
+          },
+          {
+            "name": "is_confidential_token",
+            "type": "bool"
+          },
+          {
+            "name": "condition_type",
+            "type": "u8"
+          },
+          {
+            "name": "unlock_value",
+            "type": "u64"
+          },
+          {
+            "name": "monitoring_address",
+            "type": "pubkey"
+          },
+          {
+            "name": "condition_token",
+            "type": "pubkey"
+          },
+          {
+            "name": "condition_param",
+            "type": "u64"
+          },
+          {
+            "name": "has_encrypted_recipient",
+            "type": "bool"
+          },
+          {
+            "name": "has_encrypted_amount",
+            "type": "bool"
+          },
+          {
+            "name": "has_encrypted_name",
+            "type": "bool"
+          },
+          {
+            "name": "has_encrypted_condition_value",
+            "type": "bool"
+          },
+          {
+            "name": "has_encrypted_deposit",
+            "type": "bool"
+          },
+          {
+            "name": "has_encrypted_condition_salt",
+            "type": "bool"
+          },
+          {
+            "name": "has_encrypted_fallback",
+            "type": "bool"
+          },
+          {
+            "name": "encrypted_recipient",
+            "type": {
+              "defined": {
+                "name": "Euint128"
+              }
+            }
+          },
+          {
+            "name": "encrypted_amount",
+            "type": {
+              "defined": {
+                "name": "Euint128"
+              }
+            }
+          },
+          {
+            "name": "encrypted_name",
+            "type": {
+              "defined": {
+                "name": "Euint128"
+              }
+            }
+          },
+          {
+            "name": "encrypted_condition_value",
+            "type": {
+              "defined": {
+                "name": "Euint128"
+              }
+            }
+          },
+          {
+            "name": "encrypted_deposit",
+            "type": {
+              "defined": {
+                "name": "Euint128"
+              }
+            }
+          },
+          {
+            "name": "encrypted_condition_salt",
+            "type": {
+              "defined": {
+                "name": "Euint128"
+              }
+            }
+          },
+          {
+            "name": "encrypted_fallback",
+            "type": {
+              "defined": {
+                "name": "Euint128"
+              }
+            }
+          },
+          {
+            "name": "extra_conditions_count",
+            "type": "u8"
+          },
+          {
+            "name": "secret_chunks_count",
+            "type": "u8"
+          },
+          {
+            "name": "condition_commits_count",
+            "type": "u8"
+          },
+          {
+            "name": "condition_value_commits",
+            "type": {
+              "array": [
+                {
+                  "array": [
+                    "u8",
+                    32
+                  ]
+                },
+                4
+              ]
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "VaultClaimed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "vault_id",
+            "type": "u64"
+          },
+          {
+            "name": "recipient",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "VaultCounter",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "count",
+            "type": "u64"
+          },
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "VaultCreated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "vault_id",
+            "type": "u64"
+          },
+          {
+            "name": "creator",
+            "type": "pubkey"
+          },
+          {
+            "name": "vault_type",
+            "type": "u8"
+          },
+          {
+            "name": "condition_type",
+            "type": "u8"
+          },
+          {
+            "name": "unlock_value",
+            "type": "u64"
+          },
+          {
+            "name": "deadline",
+            "type": "i64"
+          },
+          {
+            "name": "recipient_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "name",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "deposit_token",
+            "type": "pubkey"
+          },
+          {
+            "name": "deposit_amount",
+            "type": "u64"
+          },
+          {
+            "name": "condition_token",
+            "type": "pubkey"
+          },
+          {
+            "name": "privacy_flags",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "VaultRefunded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "vault_id",
+            "type": "u64"
+          },
+          {
+            "name": "refund_to",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    }
+  ]
+}
