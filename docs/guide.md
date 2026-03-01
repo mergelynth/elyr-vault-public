@@ -81,9 +81,9 @@ Add one or more conditions (combined per vault):
 | Condition | Configuration |
 |-----------|--------------|
 | **Release at Date** | Pick a UTC date/time. Vault unlocks at that timestamp. |
-| **Inactivity Timer** | Set a duration in days. Vault unlocks if the creator does not interact for that period (dead man's switch). |
-| **Balance Below** | Set a token, monitoring address, and threshold. Vault unlocks when the monitored balance drops below the threshold. |
-| **Incoming Transaction** | Set a token and monitoring address. Vault unlocks when the address receives that token. |
+| **Inactivity Timer** | Set a duration in days. Vault unlocks if the creator does not interact with the Elyr Vault contract for that period (dead man's switch). Regular network transactions **do not** count as activity — only interactions through the protocol reset the timer. |
+| **Balance Below** | Set a token, monitoring address, and threshold. Vault unlocks when the monitored balance drops below the threshold. The contract reads the live on-chain balance at claim time — no protocol interaction is required for this condition. |
+| **Incoming Transaction** | Set a token and required amount. Vault unlocks when cumulative deposits sent through the Elyr Vault contract reach the threshold. Any user can contribute. Regular token transfers **do not** satisfy this condition — only deposits routed through the protocol count. |
 
 You also configure:
 - **Deadline** — after this time, the vault can be refunded if unclaimed

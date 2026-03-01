@@ -17,7 +17,7 @@ Elyr Vault is a non-custodial protocol for creating time-locked, condition-gated
 
 - **Lock** — deposit ETH, ERC-20, SOL, SPL tokens, or secret text into a vault with configurable unlock conditions
 - **Encrypt** — every sensitive field (recipient, amount, fallback, name, conditions, secret content) can be independently FHE-encrypted before reaching the chain
-- **Unlock** — vaults release automatically when on-chain conditions are met (time, inactivity, balance threshold, incoming transaction)
+- **Unlock** — vaults release when on-chain conditions are met (time, inactivity via protocol calls, balance threshold, cumulative deposits via protocol)
 - **Claim** — authorized recipients decrypt and claim assets via wallet signature; no third party ever sees plaintext
 - **Multi-chain** — unified experience across EVM and Solana with automatic network-aware fee calculation, explorer links, and wallet management
 
@@ -54,9 +54,9 @@ Multiple conditions can be combined per vault:
 | Condition | Trigger |
 |-----------|---------|
 | **Release at Date** | Unlocks at a specific UTC timestamp |
-| **Inactivity Timer** | Unlocks after creator inactivity for N days (dead man's switch) |
-| **Balance Below** | Unlocks when a monitored address's token balance drops below a threshold |
-| **Incoming Transaction** | Unlocks when a monitored address receives specific tokens |
+| **Inactivity Timer** | Unlocks after creator inactivity for N days (dead man's switch). Only interactions with the Elyr Vault contract count as activity — regular network transactions do not reset the timer |
+| **Balance Below** | Unlocks when a monitored address's token balance drops below a threshold (reads live on-chain balance at claim time — no protocol interaction required) |
+| **Incoming Transaction** | Unlocks when cumulative deposits sent through the Elyr Vault contract reach the required threshold. Regular token transfers do not count — only deposits routed through the protocol |
 
 Conditions support a configurable claim period and fallback behavior (return to creator, send to backup address, or keep locked). When conditions are encrypted, a commit-reveal pattern ensures values remain private until claim time.
 
@@ -189,6 +189,45 @@ To interact with the protocol:
 2. Switch to **Base Sepolia** (chain ID `84532`) for EVM or **Solana Devnet** for Solana
 3. Get testnet tokens from the built-in faucet (Settings page, 24h cooldown per wallet)
 4. Create a vault via the Deploy wizard or call the contract directly
+
+---
+
+## Roadmap
+
+### Responsive & Adaptive Design
+
+- Full mobile-first responsive layout for all pages (dashboard, deploy wizard, vault detail, inbox)
+- Touch-optimized interactions for mobile wallet browsers (MetaMask Mobile, Rainbow, Phantom)
+- Adaptive navigation (bottom sheet nav on mobile, floating rail on desktop)
+
+### Coming Soon Features
+
+| Feature | Description | Status |
+|---------|-------------|--------|
+| **File Vault** | Encrypt and store files (up to 5 MB) in vaults — files are FHE-encrypted client-side before on-chain storage. Supports documents, images, credentials | Planned |
+| **Shared Admin Control** | Multi-signature vault management — multiple admins can approve vault operations (claim, refund, cancel). Requires smart contract upgrade to support multi-sig authorization | Planned |
+| **Admin Participant Role** | New participant role with full vault management permissions, beyond owner/recipient/observer | Planned |
+| **Custom Claim Shares** | Manual allocation of claim percentages per recipient (beyond first-come and equal-split) | Planned |
+| **Custom Logic Conditions** | Programmable unlock conditions via user-defined on-chain logic | Planned |
+| **Ukrainian Language** | Full UI localization in Ukrainian (translations exist, activation pending) | Planned |
+| **Base Mainnet** | Production deployment on Base L2 mainnet | Planned |
+| **Solana Mainnet** | Production deployment on Solana mainnet | Planned |
+
+### Condition Monitoring via External Protocols
+
+Currently, the **Inactivity Timer** and **Incoming Transaction** conditions rely on direct interaction with the Elyr Vault smart contract. Only the **Balance Below** condition reads live on-chain state directly.
+
+Planned integrations to enable passive, protocol-independent condition monitoring:
+
+| Integration | Use Case |
+|-------------|----------|
+| **Chainlink Automation** (Keepers) | Automated condition checks and vault unlocks without manual claims — time-based triggers, balance monitoring via Chainlink Data Feeds |
+| **The Graph** | Indexed subgraph for real-time vault event querying, activity tracking, and condition state without polling RPC nodes |
+| **Chainlink Functions** | Off-chain computation for complex condition evaluation (e.g., cross-chain balance checks, API-driven triggers) |
+| **Gelato Network** | Gasless automated execution of vault operations (auto-claim, auto-refund on deadline) |
+| **OpenZeppelin Defender** | Automated monitoring and incident response for vault conditions, with relay-based meta-transactions |
+
+These integrations will allow the **Inactivity** and **Incoming Transaction** conditions to be monitored passively — without requiring users to interact directly with the protocol contract — and will enable truly autonomous vault lifecycle management.
 
 ---
 
