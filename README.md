@@ -200,6 +200,14 @@ To interact with the protocol:
 - Touch-optimized interactions for mobile wallet browsers (MetaMask Mobile, Rainbow, Phantom)
 - Adaptive navigation (bottom sheet nav on mobile, floating rail on desktop)
 
+### Progressive Web App (PWA)
+
+- Installable on mobile and desktop — add to home screen with native app experience
+- Offline-capable shell with service worker caching (static assets, app shell, fonts)
+- Push notifications for vault events (unlock, claim, refund, expiry warning)
+- Background sync for pending transactions and draft vault persistence
+- Web App Manifest with custom icons, splash screens, and standalone display mode
+
 ### Coming Soon Features
 
 | Feature | Description | Status |
