@@ -2,12 +2,12 @@
 
 **Privacy-first encrypted vault protocol** for locking crypto assets and secret data on-chain using Fully Homomorphic Encryption (FHE).
 
-Users create vaults that hold ETH, ERC-20 tokens, SOL, SPL tokens, or arbitrary secret data — encrypted per-field at the client level before any on-chain transaction. Decryption is only possible by authorized participants via attested co-validator signatures. The protocol is multi-chain: EVM (Base Sepolia) and Solana (Devnet), both powered by the same FHE coprocessor.
+Users create vaults that hold ETH, ERC-20 tokens, SOL, SPL tokens, or arbitrary secret data — encrypted per-field at the client level before any on-chain transaction. Decryption is only possible by authorized participants via attested co-validator signatures. The protocol is multi-chain: EVM (Base Sepolia) and Solana (Devnet), both powered by the Inco Lightning coprocessor.
 
 > **Status:** Work in Progress / Alpha Testnet  
 > **Networks:** Base Sepolia (EVM) · Solana Devnet  
 > **EVM Contract:** v3.15.0 (UUPS upgradeable proxy)  
-> **Solana Program:** Anchor + FHE Lightning
+> **Solana Program:** Anchor + Inco Lightning
 
 ---
 
@@ -94,9 +94,9 @@ Multi-recipient vaults (v3.14+) support `first-come` or `equal-split` claim dist
 
 ## Encryption Specification
 
-- **Client-side encryption** — FHE SDK encrypts data in the browser before any blockchain call
+- **Client-side encryption** — Inco Lightning SDK encrypts data in the browser before any blockchain call
 - **On-chain storage** — contract converts encrypted bytes → `euint256` FHE handles
-- **Attested decryption** — `attestedDecrypt(walletClient, handles)` with co-validator signatures
+- **TEE-backed attested decryption** — `attestedDecrypt(walletClient, handles)` with TEE co-validator signatures
 - **Secret chunking** — secrets > 32 bytes are split into `euint256` chunks (32 bytes each), independently encrypted
 - **Batch decryption** — single wallet signature for all vault handles, with per-handle fallback
 - **Commit-reveal** — recipient verification via `keccak256(address)` hash
@@ -143,7 +143,7 @@ UUPS upgradeable proxy on Base Sepolia. Modular architecture with 7 base modules
 
 ### Solana — Elyr Vault Program
 
-Anchor program with FHE Lightning integration. Encrypted vault accounts, SOL/SPL token deposits, claim/refund lifecycle. Mirrors the EVM vault logic with Solana-native account model.
+Anchor program with Inco Lightning integration. Encrypted vault accounts, SOL/SPL token deposits, claim/refund lifecycle. Mirrors the EVM vault logic with Solana-native account model.
 
 #### Deployment (Solana Devnet)
 
@@ -164,7 +164,7 @@ Anchor program with FHE Lightning integration. Encrypted vault accounts, SOL/SPL
 | Styling | Tailwind CSS, Framer Motion |
 | Wallet (EVM) | RainbowKit, wagmi, viem |
 | Wallet (Solana) | `@solana/wallet-adapter` |
-| Encryption | FHE (Fully Homomorphic Encryption) coprocessor |
+| Encryption | Inco Lightning (FHE coprocessor, TEE-backed) |
 | Backend | NestJS, Prisma, PostgreSQL |
 | Monorepo | npm workspaces, Turborepo |
 
@@ -251,4 +251,4 @@ Proprietary software. All rights reserved. No use without permission.
 
 ---
 
-Built with FHE · [Inco](https://inco.org)
+Built with [Inco Lightning](https://inco.org) FHE

@@ -17,7 +17,7 @@ Elyr Vault is a privacy-first protocol for creating encrypted, condition-gated v
 | **Base Sepolia** | EVM (Ethereum L2 testnet) | ETH | Active (default) |
 | **Solana Devnet** | Solana | SOL | Active |
 
-Both networks use the Inco FHE coprocessor for on-chain encryption.
+Both networks use the Inco Lightning coprocessor for on-chain encryption.
 
 ---
 
@@ -124,7 +124,7 @@ Vaults use a commit-reveal pattern for recipient verification:
 2. At claim time, the recipient proves ownership by signing with their wallet
 3. The contract verifies the hash matches and allows the claim
 
-For encrypted recipients, FHE-based verification is used: the contract computes an `ebool` handle comparing the caller's address to the encrypted recipient.
+For encrypted recipients, TEE-backed FHE verification is used: the contract computes an `ebool` handle comparing the caller's address to the encrypted recipient.
 
 ---
 
@@ -234,7 +234,7 @@ const conditionsMet = await vault.areConditionsMet(vaultId);
 console.log("Unlockable:", conditionsMet);
 ```
 
-> **Note:** Creating vaults with encrypted fields requires the Inco FHE SDK (`@inco/js`) for client-side encryption. See the ABI for full function signatures.
+> **Note:** Creating vaults with encrypted fields requires the Inco Lightning SDK (`@inco/js`) for client-side encryption. See the ABI for full function signatures.
 
 ---
 
