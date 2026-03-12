@@ -5,7 +5,7 @@ use anchor_lang::prelude::*;
 pub mod vault;
 pub use vault::*;
 
-declare_id!("8kKZoqm42xJtu1JWvH1ZeoLsucVyUKpGfmhrY2eBHjBK");
+declare_id!("FF8YRjhL6uWoA1MamMAPdro7BPgfVyKtCcLmh1mQRm7Z");
 
 #[program]
 pub mod inco_token {
@@ -18,8 +18,12 @@ pub mod inco_token {
         vault::creation::initialize_vault_counter(ctx)
     }
 
-    /// Create a vault with SOL deposit + primary condition
-    pub fn create_vault(ctx: Context<CreateVault>, args: vault::types::CreateVaultArgs) -> Result<()> {
+    /// Create a vault with SOL/SPL deposit + primary condition
+    /// remaining_accounts (SPL): [creator_token_account, vault_token_account, token_program]
+    pub fn create_vault<'info>(
+        ctx: Context<'_, '_, '_, 'info, CreateVault<'info>>,
+        args: vault::types::CreateVaultArgs,
+    ) -> Result<()> {
         vault::creation::create_vault(ctx, args)
     }
 
@@ -119,5 +123,11 @@ pub mod inco_token {
         deadline: i64,
     ) -> Result<()> {
         vault::actions::record_activity_by_sig(ctx, wallet, nonce, deadline)
+    }
+
+    /// Withdraw accumulated protocol fees from vault_counter PDA
+    /// Only callable by the vault_counter authority. amount=0 withdraws all available.
+    pub fn withdraw_fees(ctx: Context<WithdrawFees>, amount: u64) -> Result<()> {
+        vault::creation::withdraw_fees(ctx, amount)
     }
 }

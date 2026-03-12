@@ -86,7 +86,79 @@ pub fn claim<'info>(
                 &ctx.accounts.claimer.to_account_info(),
                 amount,
             )?;
-        } else if !vault.is_confidential_token {
+        } else if vault.is_confidential_token {
+            // Confidential token transfer via CPI to Inco Token Program
+            // Uses a separate ctoken_wallet PDA (no data) as the authority,
+            // since the vault PDA carries Anchor data and can't be used for
+            // system_program::transfer.
+            //
+            // remaining_accounts layout after FHE pairs:
+            //   [spl_start+0] ctoken_wallet_pda (mut, no data)
+            //   [spl_start+1] ctoken_wallet_balance_pda (mut) — source
+            //   [spl_start+2] claimer_balance_pda (mut) — destination
+            //   [spl_start+3] confidential_mint (mut)
+            //   [spl_start+4] inco_token_program (readonly)
+            //   [spl_start+5] ctoken_wallet_spl_ata (mut) — for closing
+            //   [spl_start+6] spl_token_program (readonly) — for closing ATA
+            let extra_count = vault.extra_conditions_count as usize;
+            let total_conds = 1 + extra_count;
+            let fhe_pairs = count_fhe_pairs(vault);
+            let spl_start = extra_count + total_conds + fhe_pairs * 2;
+
+            // Derive and verify ctoken_wallet PDA
+            let vault_id_bytes = vault.id.to_le_bytes();
+            let (expected_ctoken_wallet, ctoken_bump) = Pubkey::find_program_address(
+                &[b"ctoken_wallet", &vault_id_bytes],
+                ctx.program_id,
+            );
+            require!(
+                ctx.remaining_accounts.len() >= spl_start + 7,
+                VaultError::InsufficientAccounts
+            );
+            require!(
+                ctx.remaining_accounts[spl_start].key() == expected_ctoken_wallet,
+                VaultError::InvalidAccount
+            );
+
+            let ctoken_wallet = &ctx.remaining_accounts[spl_start];
+            let ctoken_seeds: &[&[u8]] = &[b"ctoken_wallet", &vault_id_bytes, &[ctoken_bump]];
+            helpers::cpi_transfer_ctoken(
+                ctx.remaining_accounts,
+                spl_start + 1, // skip ctoken_wallet at [spl_start]
+                &ctoken_wallet.to_account_info(),
+                &ctx.accounts.claimer.to_account_info(),
+                &ctx.accounts.system_program.to_account_info(),
+                &ctx.accounts.inco_lightning_program.to_account_info(),
+                amount,
+                ctoken_seeds,
+            )?;
+
+            // Close ctoken_wallet's Balance PDA → rent to vault creator
+            helpers::cpi_close_inco_account(
+                &ctx.remaining_accounts[spl_start + 4], // inco_token_program
+                &ctx.remaining_accounts[spl_start + 1], // ctoken_wallet_balance_pda
+                &ctx.accounts.vault_creator.to_account_info(),
+                &ctoken_wallet.to_account_info(),
+                ctoken_seeds,
+            )?;
+
+            // Close ctoken_wallet's SPL ATA → rent to vault creator
+            helpers::cpi_close_spl_ata(
+                &ctx.remaining_accounts[spl_start + 6], // spl_token_program
+                &ctx.remaining_accounts[spl_start + 5], // ctoken_wallet_spl_ata
+                &ctx.accounts.vault_creator.to_account_info(),
+                &ctoken_wallet.to_account_info(),
+                ctoken_seeds,
+            )?;
+
+            // Reclaim any remaining lamports from ctoken_wallet PDA
+            helpers::reclaim_pda_lamports(
+                &ctoken_wallet.to_account_info(),
+                &ctx.accounts.vault_creator.to_account_info(),
+                &ctx.accounts.system_program.to_account_info(),
+                ctoken_seeds,
+            )?;
+        } else {
             // SPL token transfer via remaining_accounts
             let extra_count = vault.extra_conditions_count as usize;
             let total_conds = 1 + extra_count;
@@ -102,6 +174,15 @@ pub fn claim<'info>(
                     &ctx.accounts.vault.to_account_info(),
                     &ctx.remaining_accounts[spl_start + 2],
                     amount,
+                    seeds,
+                )?;
+
+                // Close vault's SPL token account → rent to creator
+                helpers::cpi_close_spl_ata(
+                    &ctx.remaining_accounts[spl_start + 2], // token_program
+                    &ctx.remaining_accounts[spl_start],     // vault_token_account
+                    &ctx.accounts.vault_creator.to_account_info(),
+                    &ctx.accounts.vault.to_account_info(),
                     seeds,
                 )?;
             }
@@ -128,11 +209,19 @@ pub struct ClaimVault<'info> {
         mut,
         seeds = [b"vault", vault_id.to_le_bytes().as_ref()],
         bump = vault.bump,
+        close = vault_creator,
     )]
     pub vault: Account<'info, Vault>,
 
     #[account(mut)]
     pub claimer: Signer<'info>,
+
+    /// CHECK: Vault creator receives rent refund on close
+    #[account(
+        mut,
+        constraint = vault_creator.key() == vault.creator @ VaultError::InvalidAccount,
+    )]
+    pub vault_creator: AccountInfo<'info>,
 
     pub system_program: Program<'info, System>,
 
@@ -186,7 +275,75 @@ pub fn refund<'info>(
                 &ctx.accounts.caller.to_account_info(),
                 amount,
             )?;
-        } else if !vault.is_confidential_token {
+        } else if vault.is_confidential_token {
+            // Confidential token refund via CPI to Inco Token Program
+            // Uses ctoken_wallet PDA as the authority.
+            //
+            // remaining_accounts layout:
+            //   [0] ctoken_wallet_pda (mut, no data)
+            //   [1] ctoken_wallet_balance_pda (mut) — source
+            //   [2] caller_balance_pda (mut) — destination
+            //   [3] confidential_mint (mut)
+            //   [4] inco_token_program (readonly)
+            //   [5] inco_lightning (readonly)
+            //   [6] ctoken_wallet_spl_ata (mut) — for closing
+            //   [7] spl_token_program (readonly) — for closing ATA
+            require!(
+                ctx.remaining_accounts.len() >= 8,
+                VaultError::InsufficientAccounts
+            );
+
+            // Derive and verify ctoken_wallet PDA
+            let vault_id_bytes = vault.id.to_le_bytes();
+            let (expected_ctoken_wallet, ctoken_bump) = Pubkey::find_program_address(
+                &[b"ctoken_wallet", &vault_id_bytes],
+                ctx.program_id,
+            );
+            require!(
+                ctx.remaining_accounts[0].key() == expected_ctoken_wallet,
+                VaultError::InvalidAccount
+            );
+
+            let ctoken_wallet = &ctx.remaining_accounts[0];
+            let inco_lightning = &ctx.remaining_accounts[5];
+            let ctoken_seeds: &[&[u8]] = &[b"ctoken_wallet", &vault_id_bytes, &[ctoken_bump]];
+            helpers::cpi_transfer_ctoken(
+                ctx.remaining_accounts,
+                1, // skip ctoken_wallet at [0]
+                &ctoken_wallet.to_account_info(),
+                &ctx.accounts.caller.to_account_info(),
+                &ctx.accounts.system_program.to_account_info(),
+                inco_lightning,
+                amount,
+                ctoken_seeds,
+            )?;
+
+            // Close ctoken_wallet's Balance PDA → rent to vault creator
+            helpers::cpi_close_inco_account(
+                &ctx.remaining_accounts[4], // inco_token_program
+                &ctx.remaining_accounts[1], // ctoken_wallet_balance_pda
+                &ctx.accounts.vault_creator.to_account_info(),
+                &ctoken_wallet.to_account_info(),
+                ctoken_seeds,
+            )?;
+
+            // Close ctoken_wallet's SPL ATA → rent to vault creator
+            helpers::cpi_close_spl_ata(
+                &ctx.remaining_accounts[7], // spl_token_program
+                &ctx.remaining_accounts[6], // ctoken_wallet_spl_ata
+                &ctx.accounts.vault_creator.to_account_info(),
+                &ctoken_wallet.to_account_info(),
+                ctoken_seeds,
+            )?;
+
+            // Reclaim any remaining lamports from ctoken_wallet PDA
+            helpers::reclaim_pda_lamports(
+                &ctoken_wallet.to_account_info(),
+                &ctx.accounts.vault_creator.to_account_info(),
+                &ctx.accounts.system_program.to_account_info(),
+                ctoken_seeds,
+            )?;
+        } else {
             // SPL token: remaining_accounts = [vault_token_account, caller_token_account, token_program]
             if ctx.remaining_accounts.len() >= 3 {
                 let vault_id_bytes = vault.id.to_le_bytes();
@@ -199,11 +356,20 @@ pub fn refund<'info>(
                     amount,
                     seeds,
                 )?;
+
+                // Close vault's SPL token account → rent to creator
+                helpers::cpi_close_spl_ata(
+                    &ctx.remaining_accounts[2], // token_program
+                    &ctx.remaining_accounts[0], // vault_token_account
+                    &ctx.accounts.vault_creator.to_account_info(),
+                    &ctx.accounts.vault.to_account_info(),
+                    seeds,
+                )?;
             }
         }
     }
 
-    // Update vault status
+    // Update vault status (data will be zeroed by Anchor close, but emit event first)
     let vault = &mut ctx.accounts.vault;
     vault.status = VaultStatus::Refunded as u8;
 
@@ -223,11 +389,19 @@ pub struct RefundVault<'info> {
         mut,
         seeds = [b"vault", vault_id.to_le_bytes().as_ref()],
         bump = vault.bump,
+        close = vault_creator,
     )]
     pub vault: Account<'info, Vault>,
 
     #[account(mut)]
     pub caller: Signer<'info>,
+
+    /// CHECK: Vault creator receives rent refund on close
+    #[account(
+        mut,
+        constraint = vault_creator.key() == vault.creator @ VaultError::InvalidAccount,
+    )]
+    pub vault_creator: AccountInfo<'info>,
 
     pub system_program: Program<'info, System>,
 }

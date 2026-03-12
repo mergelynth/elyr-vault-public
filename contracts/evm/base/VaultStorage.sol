@@ -78,6 +78,11 @@ abstract contract VaultStorage is Initializable, UUPSUpgradeable, OwnableUpgrade
     /// @dev EIP-712 nonces for recordActivityBySig replay protection (wallet → nonce)
     mapping(address => uint256) public activityNonces;
 
+    // ─── v3.16.0: Protocol fee ───────────────────────────────────────
+
+    /// @dev Protocol execution fee charged per vault creation (0.0005 ETH)
+    uint256 internal constant PROTOCOL_FEE = 0.0005 ether;
+
     // ─── Events ──────────────────────────────────────────────────────
 
     event VaultCreated(
@@ -125,6 +130,8 @@ abstract contract VaultStorage is Initializable, UUPSUpgradeable, OwnableUpgrade
     error AlreadyClaimed();
     error TooManyRecipients();
     error SecretAlreadyClaimed();
+    error InvalidName();
+    error InvalidPrivacyFlags();
     error InvalidSignature();
     error SignatureExpired();
     error InvalidNonce();

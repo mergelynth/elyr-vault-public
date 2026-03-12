@@ -118,30 +118,17 @@ abstract contract VaultCreation is VaultRecipientVerify {
         uint8[] calldata observerPerms,
         uint8 accessFlags
     ) external payable nonReentrant returns (uint256) {
-        if (conditions.length == 0) revert ConditionsNotMet();
-        if (recipients.length == 0) revert InvalidRecipient();
-        if (recipients.length > 5) revert TooManyRecipients();
-        
-        bool encryptConditions = (privacyFlags & 0x10) != 0;
-        
-        if (!encryptConditions) {
-            for (uint256 i = 0; i < conditions.length; i++) {
-                if (conditions[i].conditionType == uint8(VaultTypes.ConditionType.ReleaseAtDate)) {
-                    if (conditions[i].value <= block.timestamp) revert InvalidUnlockTime();
-                }
-            }
-        }
+        (bool encryptRecipient, bool encryptName, bool encryptConditions) = _validateVaultParams(recipients, name, conditions, privacyFlags);
         
         uint256 fee = inco.getFee();
         uint256 requiredFee = 0;
         
-        bool encryptRecipient = (privacyFlags & 0x01) != 0;
-        bool encryptName = (privacyFlags & 0x08) != 0;
         if (encryptRecipient && encRecipientBytesArray.length > 0) requiredFee += fee * encRecipientBytesArray.length;
         if (encSecretChunks.length > 0) requiredFee += fee * encSecretChunks.length;
         if (encryptName && encNameBytes.length > 0) requiredFee += fee;
         if (encryptConditions) requiredFee += fee * (conditions.length + 1);
         if (requiredFee == 0) requiredFee = fee;
+        requiredFee += PROTOCOL_FEE;
         if (msg.value < requiredFee) revert InsufficientFee();
 
         _vaultCounter++;
@@ -238,6 +225,39 @@ abstract contract VaultCreation is VaultRecipientVerify {
 
     // ─── Internal ────────────────────────────────────────────────────
 
+    /// @dev Shared validation for vault creation params
+    function _validateVaultParams(
+        address[] calldata recipients,
+        string calldata name,
+        VaultTypes.ConditionInput[] calldata conditions,
+        uint8 privacyFlags
+    ) internal view returns (bool encryptRecipient, bool encryptName, bool encryptConditions) {
+        if (conditions.length == 0) revert ConditionsNotMet();
+        if (recipients.length == 0) revert InvalidRecipient();
+        if (recipients.length > 5) revert TooManyRecipients();
+        if (privacyFlags & 0xE0 != 0) revert InvalidPrivacyFlags();
+        
+        encryptRecipient = (privacyFlags & 0x01) != 0;
+        encryptName = (privacyFlags & 0x08) != 0;
+        encryptConditions = (privacyFlags & 0x10) != 0;
+        
+        if (!encryptRecipient) {
+            for (uint256 i = 0; i < recipients.length; i++) {
+                if (recipients[i] == address(0)) revert InvalidRecipient();
+            }
+        }
+        
+        if (!encryptName && bytes(name).length == 0) revert InvalidName();
+        
+        if (!encryptConditions) {
+            for (uint256 i = 0; i < conditions.length; i++) {
+                if (conditions[i].conditionType == uint8(VaultTypes.ConditionType.ReleaseAtDate)) {
+                    if (conditions[i].value <= block.timestamp) revert InvalidUnlockTime();
+                }
+            }
+        }
+    }
+
     function _createAssetVault(
         address[] calldata recipients,
         address fallbackAddr,
@@ -260,18 +280,9 @@ abstract contract VaultCreation is VaultRecipientVerify {
         uint8[] calldata observerPerms,
         uint8 accessFlags
     ) internal returns (uint256) {
-        if (conditions.length == 0) revert ConditionsNotMet();
-        if (recipients.length == 0) revert InvalidRecipient();
-        if (recipients.length > 5) revert TooManyRecipients();
-        
-        bool encryptConditions = (privacyFlags & 0x10) != 0;
+        (bool encryptRecipient, bool encryptName, bool encryptConditions) = _validateVaultParams(recipients, name, conditions, privacyFlags);
         
         if (!encryptConditions) {
-            for (uint256 i = 0; i < conditions.length; i++) {
-                if (conditions[i].conditionType == uint8(VaultTypes.ConditionType.ReleaseAtDate)) {
-                    if (conditions[i].value <= block.timestamp) revert InvalidUnlockTime();
-                }
-            }
             if (deadline > 0 && deadline <= conditions[0].value) revert InvalidDeadline();
         }
         
@@ -279,10 +290,8 @@ abstract contract VaultCreation is VaultRecipientVerify {
         uint256 fee = inco.getFee();
         uint256 requiredFee = 0;
         
-        bool encryptRecipient = (privacyFlags & 0x01) != 0;
         bool encryptAmount = (privacyFlags & 0x02) != 0;
         bool encryptFallback = (privacyFlags & 0x04) != 0;
-        bool encryptName = (privacyFlags & 0x08) != 0;
         
         // v3.13.0: fee per encrypted recipient
         if (encryptRecipient && encRecipientBytesArray.length > 0) requiredFee += fee * encRecipientBytesArray.length;
@@ -295,6 +304,7 @@ abstract contract VaultCreation is VaultRecipientVerify {
         if (isConfidential) requiredFee += fee;
         if (requiredFee == 0) requiredFee = fee;
         
+        requiredFee += PROTOCOL_FEE;
         uint256 feePayment = depositToken == address(0) ? msg.value - depositAmount : msg.value;
         if (feePayment < requiredFee) revert InsufficientFee();
 

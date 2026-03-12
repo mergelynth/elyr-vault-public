@@ -98,7 +98,7 @@ abstract contract VaultViews is VaultActions {
         return _vaultCounter;
     }
 
-    function getRequiredFee() external view returns (uint256) {
+    function getRequiredFee() external pure returns (uint256) {
         return inco.getFee();
     }
 

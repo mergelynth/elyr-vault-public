@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/inco_token.json`.
  */
 export type IncoToken = {
-  "address": "8kKZoqm42xJtu1JWvH1ZeoLsucVyUKpGfmhrY2eBHjBK",
+  "address": "FF8YRjhL6uWoA1MamMAPdro7BPgfVyKtCcLmh1mQRm7Z",
   "metadata": {
     "name": "incoToken",
     "version": "0.1.0",
@@ -286,6 +286,10 @@ export type IncoToken = {
           "signer": true
         },
         {
+          "name": "vaultCreator",
+          "writable": true
+        },
+        {
           "name": "systemProgram",
           "address": "11111111111111111111111111111111"
         },
@@ -328,7 +332,8 @@ export type IncoToken = {
     {
       "name": "createVault",
       "docs": [
-        "Create a vault with SOL deposit + primary condition"
+        "Create a vault with SOL/SPL deposit + primary condition",
+        "remaining_accounts (SPL): [creator_token_account, vault_token_account, token_program]"
       ],
       "discriminator": [
         29,
@@ -913,6 +918,10 @@ export type IncoToken = {
           "signer": true
         },
         {
+          "name": "vaultCreator",
+          "writable": true
+        },
+        {
           "name": "systemProgram",
           "address": "11111111111111111111111111111111"
         }
@@ -1002,6 +1011,62 @@ export type IncoToken = {
         {
           "name": "inputType",
           "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "withdrawFees",
+      "docs": [
+        "Withdraw accumulated protocol fees from vault_counter PDA",
+        "Only callable by the vault_counter authority. amount=0 withdraws all available."
+      ],
+      "discriminator": [
+        198,
+        212,
+        171,
+        109,
+        144,
+        215,
+        174,
+        89
+      ],
+      "accounts": [
+        {
+          "name": "vaultCounter",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116,
+                  95,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116,
+                  101,
+                  114
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
         }
       ]
     }
@@ -1389,8 +1454,28 @@ export type IncoToken = {
     },
     {
       "code": 6031,
+      "name": "insufficientAccounts",
+      "msg": "Insufficient remaining accounts for SPL token deposit"
+    },
+    {
+      "code": 6032,
+      "name": "insufficientProtocolFee",
+      "msg": "Insufficient protocol fee"
+    },
+    {
+      "code": 6033,
+      "name": "notFeeAuthority",
+      "msg": "Not authorized to withdraw fees"
+    },
+    {
+      "code": 6034,
       "name": "invalidExtraConditionAccounts",
       "msg": "Invalid remaining accounts for extra conditions"
+    },
+    {
+      "code": 6035,
+      "name": "invalidAccount",
+      "msg": "Invalid account — PDA mismatch"
     }
   ],
   "types": [
@@ -1582,6 +1667,14 @@ export type IncoToken = {
           {
             "name": "depositAmount",
             "type": "u64"
+          },
+          {
+            "name": "depositToken",
+            "type": "pubkey"
+          },
+          {
+            "name": "isConfidentialToken",
+            "type": "bool"
           },
           {
             "name": "condition",

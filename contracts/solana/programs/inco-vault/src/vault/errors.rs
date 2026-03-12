@@ -95,6 +95,18 @@ pub enum VaultError {
     #[msg("SPL token transfer failed")]
     SplTransferFailed,
 
+    #[msg("Insufficient remaining accounts for SPL token deposit")]
+    InsufficientAccounts,
+
+    #[msg("Insufficient protocol fee")]
+    InsufficientProtocolFee,
+
+    #[msg("Not authorized to withdraw fees")]
+    NotFeeAuthority,
+
     #[msg("Invalid remaining accounts for extra conditions")]
     InvalidExtraConditionAccounts,
+
+    #[msg("Invalid account — PDA mismatch")]
+    InvalidAccount,
 }

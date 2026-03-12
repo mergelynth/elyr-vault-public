@@ -32,9 +32,15 @@ contract PrivateVaultV3 is VaultViews {
     /// @dev Only the owner can upgrade the contract
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
+    /// @notice Withdraw protocol fees from contract
+    function withdrawFees(uint256 amount) external onlyOwner {
+        (bool ok, ) = msg.sender.call{value: amount}("");
+        require(ok);
+    }
+
     /// @notice Returns the current implementation version
     function version() external pure returns (string memory) {
-        return "3.15.0";
+        return "3.16.0";
     }
 
     receive() external payable {}

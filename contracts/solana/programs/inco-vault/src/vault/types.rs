@@ -45,6 +45,9 @@ pub const PRIVACY_ENCRYPT_FALLBACK: u8    = 0x04;
 pub const PRIVACY_ENCRYPT_NAME: u8        = 0x08;
 pub const PRIVACY_ENCRYPT_CONDITIONS: u8  = 0x10;
 
+/// Protocol execution fee in lamports (0.005 SOL)
+pub const PROTOCOL_FEE_LAMPORTS: u64 = 5_000_000;
+
 // ─── Encrypted Field Selector ────────────────────────────────────────
 
 #[repr(u8)]
@@ -82,7 +85,9 @@ pub struct CreateVaultArgs {
     pub deadline: i64,           // 0 = no deadline
     pub vault_type: u8,          // 0=Asset, 1=Secret, 2=Hybrid
     pub privacy_flags: u8,
-    pub deposit_amount: u64,     // SOL lamports (0 for secret vaults)
+    pub deposit_amount: u64,     // SOL lamports or SPL token units (0 for secret vaults)
+    pub deposit_token: Pubkey,   // Pubkey::default() = native SOL, otherwise SPL mint
+    pub is_confidential_token: bool,
     pub condition: ConditionInput,
     pub recipient_commit: [u8; 32],
     pub fallback_commit: [u8; 32],
